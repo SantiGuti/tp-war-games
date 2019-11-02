@@ -15,9 +15,6 @@ ret
 proc initJuego
     call printMap
     call pedirCoordBase
-    mov baseSecretaJug1, bl
-    call pedirCoordBase
-    mov baseSecretaJug2, bl
     ;call elegirTurno
     ;imprimir a quien le toca jugar
   ret
@@ -35,32 +32,61 @@ proc printMap
 endp
 
 proc pedirCoordBase
-
-  scanNumber:
-    mov dl, 10
     mov bl, 0
-    
-    mov ah, 1
-    int 21h
-    
-    cmp al, 13
-    je exit
-    
-    mov ah, 0
-    sub al, 48
-    
-    mov cl, al
-    mov al, bl
-    
-    mul dl
-    
-    add al, cl
-    mov bl, al
-    
-    jmp scanNumber
-    
+    mov bh, 0
+    while:
+        cmp bl, 2
+        je selector
+        mov ah, 7
+        int 21h
+        sub al, 48
+        mov cl, al
+        mov al, auxiliarCoord
+        mov dl, 10
+        mul dl
+        add al, cl
+        mov auxiliarCoord, al
+        inc bl
+        jmp while
+        
+    selector:
+        cmp bh, 0
+        je caso1
+        cmp bh, 1
+        je caso2
+        cmp bh, 2
+        je caso3
+        cmp bh, 3
+        je caso4
+                    
+    caso1:
+        mov al, auxiliarCoord
+        mov auxiliarCoord, 0
+        mov baseSecretaXJug1, al
+        inc bh
+        mov bl, 0
+        jmp while
+    caso2:
+        mov al, auxiliarCoord
+        mov auxiliarCoord, 0
+        mov baseSecretaYJug1, al
+        inc bh
+        mov bl, 0
+        jmp while
+    caso3:
+        mov al, auxiliarCoord
+        mov auxiliarCoord, 0
+        mov baseSecretaXJug2, al
+        inc bh
+        mov bl, 0
+        jmp while
+    caso4:
+        mov al, auxiliarCoord
+        mov auxiliarCoord, 0
+        mov baseSecretaYJug2, al
+        jmp exit
 exit:        
-  ret
+   ret
 endp     
 
 
@@ -69,9 +95,15 @@ mapaArriba db "00..........................WAR GAMES -1983......................
 
 mapaAbajo db "10..............-+++:-..........:+::+::++++++:-......-....-...---.........",10,13,"11..............:::++++:-............::+++:+:.............:--+--.-........",10,13,"12..............-+++++++++:...........+:+::+................--.....---....",10,13,"13................:++++++:...........-+::+::.:-................-++:-:.....",10,13,"14.................++::+-.............::++:..:...............++++++++-....",10,13,"15.................:++:-...............::-..................-+:--:++:.....",10,13,"16.................:+-............................................-.....--",10,13,"17.................:....................................................--",10,13,"18.......UNITED STATES.........................SOVIET UNION...............$"
 
-baseSecretaJug1 db ?
+auxiliarCoord db ?
 
-baseSecretaJug2 db ? 
+baseSecretaXJug1 db ?
+
+baseSecretaYJug1 db ?
+
+baseSecretaXJug2 db ?
+
+baseSecretaYJug2 db ? 
 
 
 
