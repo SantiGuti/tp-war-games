@@ -10,8 +10,6 @@ ret
 
 
 
-
-
 proc initJuego
     call printMap
     call pedirCoordBase
@@ -19,7 +17,14 @@ proc initJuego
     ;imprimir a quien le toca jugar
   ret
 endp  
-  
+
+proc jugar
+    ;call printMap
+    ;call informarPaisTurno
+    ;call leerCoordenadas
+    ;call disparar
+    ;call informarResultado
+    ;call actualizarSiguienteTurno  
 
 proc printMap
     mov ah,09
@@ -104,7 +109,3 @@ baseSecretaYJug1 db ?
 baseSecretaXJug2 db ?
 
 baseSecretaYJug2 db ? 
-
-
-
-
