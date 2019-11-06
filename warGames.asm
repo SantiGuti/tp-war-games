@@ -11,9 +11,9 @@ ret
 
 
 proc initJuego
-    call printMap
-    call pedirCoordBase
-    ;call elegirTurno
+    ;call printMap
+    ;call pedirCoordBase
+    call elegirTurno
     ;imprimir a quien le toca jugar
   ret
 endp  
@@ -95,6 +95,34 @@ exit:
 endp     
 
 
+proc elegirTurno
+   mov ah, 00h ;interrupcion para obtener la hora del sistema
+   int 1ah ;cx:dx ahora tienen los ticks del reloj desde la medianoche      
+
+   mov  ax, dx
+   xor  dx, dx
+   mov  cx, 10    
+   div  cx       ;aca dx contiene el resto de la division - desde 0 a 9
+   
+   cmp dx, 4
+   jbe jug1
+   cmp dx, 5
+   jae jug2
+   
+   jug1:
+   mov ah, 1
+   mov quienEmpieza, ah
+   jmp leave
+   
+   jug2:
+   mov ah, 2
+   mov quienEmpieza, ah
+   jmp leave
+
+
+leave:    
+    ret
+endp
 
 mapaArriba db "00..........................WAR GAMES -1983...............................",10,13,"01.......-.....:**:::*=-..-++++:............:--::=WWW***+-++-.............",10,13,"02...:=WWWWWWW=WWW=:::+:..::...--....:=+W==WWWWWWWWWWWWWWWWWWWWWWWW+-.....",10,13,"03..-....:WWWWWWWW=-=WW*.........--..+::+=WWWWWWWWWWWWWWWWWWWW:..:=.......",10,13,"04.......+WWWWWW*+WWW=-:-.........-+*=:::::=W*W=WWWW*++++++:+++=-.........",10,13,"05......*WWWWWWWWW=..............::..-:--+++::-++:::++++++++:--..-........",10,13,"06.......:**WW=*=...............-++++:::::-:+::++++++:++++++++............",10,13,"08........-+:...-..............:+++++::+:++-++::-.-++++::+:::-............",10,13,"09..........--:-...............::++:+++++++:-+:.....::...-+:...-..........",10,13,"$"
 
@@ -108,4 +136,6 @@ baseSecretaYJug1 db ?
 
 baseSecretaXJug2 db ?
 
-baseSecretaYJug2 db ? 
+baseSecretaYJug2 db ?
+
+quienEmpieza db ? 
