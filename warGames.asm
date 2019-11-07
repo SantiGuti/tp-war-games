@@ -18,8 +18,9 @@ proc initJuego
 endp  
 
 proc jugar
+    call clearScreen
     call printMap
-    ;call informarPaisTurno
+    call informarPaisTurno
     ;call leerCoordenadas
     ;call disparar
     ;call informarResultado
@@ -37,6 +38,7 @@ proc clearScreen
     mov ah, 0x00
     mov al, 0x03 
     int 0x10
+    ret
 endp
     
 proc printMap
@@ -115,7 +117,7 @@ proc pedirCoordBase
         jmp exit
 exit:        
    ret
-endp     
+endp
 
 
 proc elegirTurno
@@ -147,7 +149,31 @@ leave:
     ret
 endp
 
-proc 
+proc informarPaisTurno
+    mov bh, quienJuega
+    cmp bh, 1
+    je Juega1
+    jmp Juega2
+    
+    Juega1:
+    mov dx, offset JuegaJug1
+    call print
+    mov bh, 2
+    mov quienJuega, bh
+    jmp salir
+    
+    Juega2:
+    mov dx, offset JuegaJug2
+    call print
+    mov bh, 1
+    mov quienJuega, bh
+    jmp salir
+    
+salir:
+    ret
+endp
+    
+ 
 
 mapaArriba db "00..........................WAR GAMES -1983...............................",10,13,"01.......-.....:**:::*=-..-++++:............:--::=WWW***+-++-.............",10,13,"02...:=WWWWWWW=WWW=:::+:..::...--....:=+W==WWWWWWWWWWWWWWWWWWWWWWWW+-.....",10,13,"03..-....:WWWWWWWW=-=WW*.........--..+::+=WWWWWWWWWWWWWWWWWWWW:..:=.......",10,13,"04.......+WWWWWW*+WWW=-:-.........-+*=:::::=W*W=WWWW*++++++:+++=-.........",10,13,"05......*WWWWWWWWW=..............::..-:--+++::-++:::++++++++:--..-........",10,13,"06.......:**WW=*=...............-++++:::::-:+::++++++:++++++++............",10,13,"08........-+:...-..............:+++++::+:++-++::-.-++++::+:::-............",10,13,"09..........--:-...............::++:+++++++:-+:.....::...-+:...-..........",10,13,"$"
 
@@ -171,4 +197,8 @@ pedirBaseYJug1 db 10,13,"Jugador 1 Ingrese coordenada Y de Base Secreta: $"
 
 pedirBaseXJug2 db 10,13,"Jugador 2 Ingrese coordenada X de Base Secreta: $"
 
-pedirBaseYJug2 db 10,13,"Jugador 2 Ingrese coordenada Y de Base Secreta: $" 
+pedirBaseYJug2 db 10,13,"Jugador 2 Ingrese coordenada Y de Base Secreta: $"
+
+JuegaJug1 db 10,13,"Turno del Jugador 1$"
+
+JuegaJug2 db 10,13,"Turno del Jugador 2$" 
