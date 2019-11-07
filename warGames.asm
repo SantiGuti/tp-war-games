@@ -21,37 +21,49 @@ proc jugar
     call clearScreen
     call printMap
     call informarPaisTurno
-    ;call leerCoordenadas
+    call leerCoordenadas
     ;call disparar
     ;call informarResultado
     ;call actualizarSiguienteTurno
 ret
 endp
 
-proc print
+proc print ;Para el flujo del programa para imprimir algo
     mov ah, 09
     int 21h
     ret
 endp
 
-proc clearScreen
+proc clearScreen ;Limpia todos los print que van quedando
     mov ah, 0x00
     mov al, 0x03 
     int 0x10
     ret
 endp
-    
-proc printMap
-    mov ah,09
+
+
+proc leerDatoYPasarADec
+     mov ah, 7
+     int 21h ;Para el flujo del programa para recibir un dato por teclado
+     sub al, 48
+     mov cl, al
+     mov al, auxiliarCoord ;auxiliarCoord la primera vez vale 0, la segunda guarda el primer dato pasado que se multiplica por diez 
+     mov dl, 10
+     mul dl
+     add al, cl
+     mov auxiliarCoord, al ;Lo pasa de ASCII a Dec restando y multiplicando y lo guarda en auxiliarCoord 
+     ret
+endp
+     
+proc printMap ;Imprime el mapa del juego
     mov dx,offset mapaArriba
-    int 21h
-    mov ah,09
+    call print
     mov dx,offset mapaAbajo
-    int 21h
+    call print
   ret
 endp
 
-proc pedirCoordBase
+proc pedirCoordBase ;Pide las coordenadas de la base secreta
     
     mov bl, 0
     mov bh, 0
@@ -60,15 +72,7 @@ proc pedirCoordBase
     while:
         cmp bl, 2
         je selector
-        mov ah, 7
-        int 21h
-        sub al, 48
-        mov cl, al
-        mov al, auxiliarCoord
-        mov dl, 10
-        mul dl
-        add al, cl
-        mov auxiliarCoord, al
+        call leerDatoYPasarADec
         inc bl
         jmp while
         
@@ -135,41 +139,112 @@ proc elegirTurno
    jae jug2
    
    jug1:
-   mov ah, 1
-   mov quienJuega, ah
-   jmp leave
+        mov quienJuega, 1
+        jmp leave
    
    jug2:
-   mov ah, 2
-   mov quienJuega, ah
-   jmp leave
+        mov quienJuega, 2
+        jmp leave
 
 
 leave:    
     ret
 endp
 
-proc informarPaisTurno
+proc informarPaisTurno ;Muestra por pantalla de quien es el turno
     mov bh, quienJuega
     cmp bh, 1
     je Juega1
     jmp Juega2
     
     Juega1:
-    mov dx, offset JuegaJug1
-    call print
-    mov bh, 2
-    mov quienJuega, bh
-    jmp salir
+        mov dx, offset JuegaJug1
+        call print
+        mov bh, 2
+        mov quienJuega, bh
+        jmp salir
     
     Juega2:
-    mov dx, offset JuegaJug2
-    call print
-    mov bh, 1
-    mov quienJuega, bh
-    jmp salir
+        mov dx, offset JuegaJug2
+        call print
+        mov bh, 1
+        mov quienJuega, bh
+        jmp salir
     
 salir:
+    ret
+endp
+
+proc leerCoordenadas ;Pide las coordenadas del disparo de X jugador
+    mov bh, 0
+    cmp quienJuega, 1 ;Los saltos estan al reves aproposito ya que quienJuega se le suma 1 justo despues de avisar de quien es el turno
+    je dispJug2
+    
+    dispJug1:
+        mov bl, 0
+        mov dx, offset pedirDisparoXJug1
+        call print
+        jmp while2 
+        
+    dispJug2:
+        mov bl, 0
+        mov dx, offset pedirDisparoXJug2
+        call print
+        jmp while2 
+        
+    while2:
+         cmp bl, 2
+         je asignador
+         call leerDatoYPasarADec
+         inc bl
+         jmp while2
+         
+    asignador:
+        cmp quienJuega, 1
+        je asignJug2
+        jmp asignJug1
+        
+    asignJug1:
+        cmp bh, 1
+        je segundoCasoCoordYJug1
+        
+        primerCasoCoordXJug1:
+            mov al, auxiliarCoord
+            mov auxiliarCoord, 0
+            mov coordDisparoXJug1, al
+            inc bh
+            mov bl, 0
+            mov dx, offset pedirDisparoYJug1
+            call print
+            jmp while2
+            
+        segundoCasoCoordYJug1:              
+            mov al, auxiliarCoord
+            mov auxiliarCoord, 0
+            mov coordDisparoYJug1, al
+            jmp exit2
+            
+    asignJug2:
+        cmp bh, 1
+        je segundoCasoCoordYJug2
+        
+        primerCasoCoordXJug2:
+            mov al, auxiliarCoord
+            mov auxiliarCoord, 0
+            mov coordDisparoXJug2, al
+            inc bh
+            mov bl, 0
+            mov dx, offset pedirDisparoYJug2
+            call print
+            jmp while2
+            
+        segundoCasoCoordYJug2:              
+            mov al, auxiliarCoord
+            mov auxiliarCoord, 0
+            mov coordDisparoYJug2, al
+            jmp exit2            
+
+exit2:                
     ret
 endp
     
@@ -201,4 +276,20 @@ pedirBaseYJug2 db 10,13,"Jugador 2 Ingrese coordenada Y de Base Secreta: $"
 
 JuegaJug1 db 10,13,"Turno del Jugador 1$"
 
-JuegaJug2 db 10,13,"Turno del Jugador 2$" 
+JuegaJug2 db 10,13,"Turno del Jugador 2$"
+
+pedirDisparoXJug1 db 10,13,"Jugador 1 Ingrese coordenada X de su proximo ataque: $"
+
+pedirDisparoYJug1 db 10,13,"Jugador 1 Ingrese coordenada Y de su proximo ataque: $"
+
+pedirDisparoXJug2 db 10,13,"Jugador 2 Ingrese coordenada X de su proximo ataque: $"
+
+pedirDisparoYJug2 db 10,13,"Jugador 2 Ingrese coordenada Y de su proximo ataque: $" 
+
+coordDisparoXJug1 db ?
+
+coordDisparoYJug1 db ?
+
+coordDisparoXJug2 db ?
+
+coordDisparoYJug2 db ?
