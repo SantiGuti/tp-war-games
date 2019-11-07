@@ -18,7 +18,6 @@ proc initJuego
 endp  
 
 proc jugar
-    call clearScreen
     call printMap
     call informarPaisTurno
     call leerCoordenadas
