@@ -4,28 +4,41 @@
 
 org 100h
     call initJuego
-    ;call jugar
+    call jugar
     ;call guardarRanking
 ret 
 
 
 
 proc initJuego
-    ;call printMap
-    ;call pedirCoordBase
+    call printMap
+    call pedirCoordBase
     call elegirTurno
-    ;imprimir a quien le toca jugar
   ret
 endp  
 
 proc jugar
-    ;call printMap
+    call printMap
     ;call informarPaisTurno
     ;call leerCoordenadas
     ;call disparar
     ;call informarResultado
-    ;call actualizarSiguienteTurno  
+    ;call actualizarSiguienteTurno
+ret
+endp
 
+proc print
+    mov ah, 09
+    int 21h
+    ret
+endp
+
+proc clearScreen
+    mov ah, 0x00
+    mov al, 0x03 
+    int 0x10
+endp
+    
 proc printMap
     mov ah,09
     mov dx,offset mapaArriba
@@ -37,8 +50,11 @@ proc printMap
 endp
 
 proc pedirCoordBase
+    
     mov bl, 0
     mov bh, 0
+    mov dx, offset pedirBaseXJug1
+    call print
     while:
         cmp bl, 2
         je selector
@@ -70,6 +86,8 @@ proc pedirCoordBase
         mov baseSecretaXJug1, al
         inc bh
         mov bl, 0
+        mov dx, offset pedirBaseYJug1
+        call print
         jmp while
     caso2:
         mov al, auxiliarCoord
@@ -77,6 +95,8 @@ proc pedirCoordBase
         mov baseSecretaYJug1, al
         inc bh
         mov bl, 0
+        mov dx, offset pedirBaseXJug2
+        call print
         jmp while
     caso3:
         mov al, auxiliarCoord
@@ -84,11 +104,14 @@ proc pedirCoordBase
         mov baseSecretaXJug2, al
         inc bh
         mov bl, 0
+        mov dx, offset pedirBaseYJug2
+        call print
         jmp while
     caso4:
         mov al, auxiliarCoord
         mov auxiliarCoord, 0
         mov baseSecretaYJug2, al
+        call clearScreen
         jmp exit
 exit:        
    ret
@@ -111,18 +134,20 @@ proc elegirTurno
    
    jug1:
    mov ah, 1
-   mov quienEmpieza, ah
+   mov quienJuega, ah
    jmp leave
    
    jug2:
    mov ah, 2
-   mov quienEmpieza, ah
+   mov quienJuega, ah
    jmp leave
 
 
 leave:    
     ret
 endp
+
+proc 
 
 mapaArriba db "00..........................WAR GAMES -1983...............................",10,13,"01.......-.....:**:::*=-..-++++:............:--::=WWW***+-++-.............",10,13,"02...:=WWWWWWW=WWW=:::+:..::...--....:=+W==WWWWWWWWWWWWWWWWWWWWWWWW+-.....",10,13,"03..-....:WWWWWWWW=-=WW*.........--..+::+=WWWWWWWWWWWWWWWWWWWW:..:=.......",10,13,"04.......+WWWWWW*+WWW=-:-.........-+*=:::::=W*W=WWWW*++++++:+++=-.........",10,13,"05......*WWWWWWWWW=..............::..-:--+++::-++:::++++++++:--..-........",10,13,"06.......:**WW=*=...............-++++:::::-:+::++++++:++++++++............",10,13,"08........-+:...-..............:+++++::+:++-++::-.-++++::+:::-............",10,13,"09..........--:-...............::++:+++++++:-+:.....::...-+:...-..........",10,13,"$"
 
@@ -138,4 +163,12 @@ baseSecretaXJug2 db ?
 
 baseSecretaYJug2 db ?
 
-quienEmpieza db ? 
+quienJuega db ?
+
+pedirBaseXJug1 db 10,13,"Jugador 1 Ingrese coordenada X de Base Secreta: $"
+
+pedirBaseYJug1 db 10,13,"Jugador 1 Ingrese coordenada Y de Base Secreta: $"
+
+pedirBaseXJug2 db 10,13,"Jugador 2 Ingrese coordenada X de Base Secreta: $"
+
+pedirBaseYJug2 db 10,13,"Jugador 2 Ingrese coordenada Y de Base Secreta: $" 
