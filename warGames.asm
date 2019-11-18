@@ -48,23 +48,47 @@ endp
 proc pedirCoordBase ;Pide las coordenadas de la base secreta
     mov visualizarInput,0
     
-    printMsg pedirBaseXJug1
-    call pedirInput 
-    mov baseSecretaXJug1,al
+    ciclo_coor_base_x_j1:
+        printMsg pedirBaseXJug1,21
+        call pedirInput 
+        mov baseSecretaXJug1,al
+        cmp al,33               ; se valida que la coordenada X ingresada para USA no sea mayor a 33
+        jbe ciclo_coor_base_y_j1 
+        printMsg msgCoorXInc,23
+        jmp ciclo_coor_base_x_j1
     
-    printMsg pedirBaseYJug1
-    call pedirInput
-    mov baseSecretaYJug1,al
     
-    printMsg pedirBaseXJug2
-    call pedirInput 
-    mov baseSecretaXJug2,al
+    ciclo_coor_base_y_j1:
+        printMsg pedirBaseYJug1,21
+        call pedirInput
+        mov baseSecretaYJug1,al
+        cmp al,18                ; se valida que la coor Y ingresada no sea mayor a 18
+        jbe ciclo_coor_base_x_j2 
+        printMsg msgCoorYInc,23
+        jmp ciclo_coor_base_y_j1
     
-    printMsg pedirBaseYJug2
-    call pedirInput
-    mov baseSecretaYJug2,al 
-            
-   ret
+    
+    ciclo_coor_base_x_j2:
+        printMsg pedirBaseXJug2,21
+        call pedirInput 
+        mov baseSecretaXJug2,al
+        cmp al,33               ; se valida que la coordenada X ingresada para URSS sea mayor a 33
+        ja ciclo_coor_base_y_j2 
+        printMsg msgCoorXInc,23
+        jmp ciclo_coor_base_x_j2
+    
+    
+    ciclo_coor_base_y_j2:
+        printMsg pedirBaseYJug2,21
+        call pedirInput
+        mov baseSecretaYJug2,al
+        cmp al,18              ; se valida que la coor Y ingresada no sea mayor a 18
+        jbe fin_pedirCoordBase 
+        printMsg msgCoorYInc,23
+        jmp ciclo_coor_base_y_j2 
+   
+   fin_pedirCoordBase:         
+        ret
 endp
 
 proc elegirTurno
@@ -121,25 +145,45 @@ proc leerCoordenadas ;Pide las coordenadas del disparo
     je dispJug2
     
     dispJug1:
-        printTurno JuegaJug1
-        printMsg pedirDisparoXJug1
+    printMsg JuegaJug1,20
+    ciclo_disparo_X_j1:
+        printMsg pedirDisparoX,21
         call pedirInput 
-        mov coordDisparoXJug1,al
+        mov coordDisparoXJug1,al        
+        cmp coordDisparoXJug1,71
+        jbe ciclo_disparo_Y_j1
+        printMsg msgCoorXInc,23
+        jmp ciclo_disparo_X_j1
         
-        printMsg pedirDisparoYJug1
+        
+    ciclo_disparo_Y_j1:
+        printMsg pedirDisparoY,21
         call pedirInput
         mov coordDisparoYJug1,al
-        jmp fin_leerCoordenadas
+        cmp coordDisparoYJug1,18
+        jbe fin_leerCoordenadas  
+        printMsg msgCoorYInc,23
+        jmp ciclo_disparo_Y_j1
         
     dispJug2:
-        printTurno JuegaJug2
-        printMsg pedirDisparoXJug2
+        printMsg JuegaJug2,20 
+    ciclo_disparo_X_j2:
+        printMsg pedirDisparoX,21
         call pedirInput 
-        mov coordDisparoXJug2,al
+        mov coordDisparoXJug2,al 
+        cmp  coordDisparoXJug2,71
+        jbe ciclo_disparo_Y_j2
+        printMsg msgCoorXInc,23
+        jmp ciclo_disparo_X_j2
         
-        printMsg pedirDisparoYJug2
+    ciclo_disparo_Y_j2:
+        printMsg pedirDisparoY,21
         call pedirInput
-        mov coordDisparoYJug2,al
+        mov coordDisparoYJug2,al   
+        cmp coordDisparoYJug2,18
+        jbe fin_leerCoordenadas  
+        printMsg msgCoorYInc,23
+        jmp ciclo_disparo_Y_j2
     
     fin_leerCoordenadas:                    
     ret
@@ -153,30 +197,20 @@ proc disparar
     cmp quienJuega, 1 
     je jugoJug2
     
-    ;se verifica que las coordenadas ingresadas sean validas
     jugoJug1:
-    cmp  coordDisparoXJug1,71
-    ja  coorInvalida
-    cmp  coordDisparoYJug1,18
-    ja  coorInvalida
     ;se mueven las coordenadas a los registros utilizados para actualizar el mapa
     mov dl,coordDisparoYJug1
     mov bl,coordDisparoXJug1
     call actualizarMapa
     jmp  fin_disparar
+    
     jugoJug2:
-    cmp  coordDisparoXJug2,71
-    ja  coorInvalida
-    cmp  coordDisparoYJug2,18
-    ja  coorInvalida
     ;se mueven las coordenadas a los registros utilizados para actualizar el mapa
     mov dl,coordDisparoYJug2
     mov bl,coordDisparoXJug2
     call actualizarMapa
     jmp  fin_disparar
-    
-    coorInvalida:
-    
+      
     
     fin_disparar:
     ret
@@ -295,8 +329,7 @@ proc actualizarMapa
     jmp fin_actualizarMapa
     no_sumar_abajo_der:
     mov [bx+76+1],cl       
-    
-    
+        
     fin_actualizarMapa:
     ret
 endp
@@ -376,8 +409,7 @@ proc pedirInput
         add cantInput,-1
         mov al,08
         jmp ciclo_input
-        
-    
+          
     guardarCoor:
         mov al,inputDec
         cmp cantInput,2
@@ -410,25 +442,29 @@ baseSecretaYJug2 db ?
 
 quienJuega db ?
 
-pedirBaseXJug1 db "Jugador 1 Ingrese coordenada X de Base Secreta: $"
+pedirBaseXJug1 db "UNITED STATES Ingrese coordenada X de Base Secreta: $"
 
-pedirBaseYJug1 db "Jugador 1 Ingrese coordenada Y de Base Secreta: $"
+pedirBaseYJug1 db "UNITED STATES Ingrese coordenada Y de Base Secreta: $"
 
-pedirBaseXJug2 db "Jugador 2 Ingrese coordenada X de Base Secreta: $"
+pedirBaseXJug2 db "SOVIET UNION Ingrese coordenada X de Base Secreta: $"
 
-pedirBaseYJug2 db "Jugador 2 Ingrese coordenada Y de Base Secreta: $"
+pedirBaseYJug2 db "SOVIET UNION Ingrese coordenada Y de Base Secreta: $"
 
-JuegaJug1 db "Turno del Jugador 1$"
+JuegaJug1 db "Turno de UNITED STATES$"
 
-JuegaJug2 db "Turno del Jugador 2$"
+JuegaJug2 db "Turno de SOVIET UNION$"
 
-pedirDisparoXJug1 db "Jugador 1 Ingrese coordenada X de su proximo ataque: $"
+pedirDisparoX db "Ingrese coordenada X de su proximo ataque: $"
 
-pedirDisparoYJug1 db "Jugador 1 Ingrese coordenada Y de su proximo ataque: $"
+pedirDisparoY db "Ingrese coordenada Y de su proximo ataque: $" 
 
-pedirDisparoXJug2 db "Jugador 2 Ingrese coordenada X de su proximo ataque: $"
+msgCoorXInc db "Valor de coordenada X fuera de rango. Ingrese un nuevo valor$" 
 
-pedirDisparoYJug2 db "Jugador 2 Ingrese coordenada Y de su proximo ataque: $" 
+msgCoorYInc db "Valor de coordenada Y fuera de rango. Ingrese un nuevo valor$"
+
+;pedirDisparoXJug2 db "SOVIET UNION Ingrese coordenada X de su proximo ataque: $"
+
+;pedirDisparoYJug2 db "SOVIET UNION Ingrese coordenada Y de su proximo ataque: $" 
 
 coordDisparoXJug1 db ?
 
