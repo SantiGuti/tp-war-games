@@ -3,7 +3,7 @@ org 100h
 inicializar_juego:
     call initJuego
     call jugar
-    ;call guardarRanking
+    call guardarRanking
     call volverAJugar
 ret 
 
@@ -214,6 +214,7 @@ proc disparar
     ;se mueven las coordenadas a los registros utilizados para actualizar el mapa
     mov cl,coordDisparoYJug1
     mov bl,coordDisparoXJug1
+    inc cantDisparosUSA
     call actualizarMapa
     jmp  fin_disparar
     
@@ -221,6 +222,7 @@ proc disparar
     ;se mueven las coordenadas a los registros utilizados para actualizar el mapa
     mov cl,coordDisparoYJug2
     mov bl,coordDisparoXJug2
+    inc cantDisparosURSS
     call actualizarMapa
     jmp  fin_disparar
       
@@ -721,6 +723,7 @@ proc volverAJugar
     cmp base_urss_dest,1
     jne check_base_usa
     printMsg empate,23
+    mov quienGano, 0
     jmp ciclo_volver_a_jugar
     
     
@@ -728,24 +731,28 @@ proc volverAJugar
     cmp base_usa_dest,1
     jne check_base_urss
     printMsg ganoURSSb,23
+    mov quienGano, 2
     jmp ciclo_volver_a_jugar 
 
 check_base_urss:
     cmp base_urss_dest,1
     jne check_w_usa
     printMsg ganoUSAb,23
+    mov quienGano, 1
     jmp ciclo_volver_a_jugar
  
 check_w_usa:
     cmp  cant_w_usa,0
     jne  check_w_urss 
     printMsg ganoURSSw,23
+    mov quienGano, 2
     jmp fin_informarResultado 
     
 check_w_urss:
     cmp  cant_w_urss,0
     jne  ciclo_volver_a_jugar 
     printMsg ganoUSAw,23
+    mov quienGano, 1
      
 ciclo_volver_a_jugar:      
     printMsg msgVolverAJugar,21
@@ -797,6 +804,51 @@ ciclo_mapa_abajo:
     ret
 endp
 
+proc queEscribeEstadisticas
+    
+    cmp quienGano, 0
+    je ganoEmpate
+    cmp quienGano, 2
+    je ganoURSS
+    
+    ganoUSA:
+        mov bh, USA
+        add texto_estadisticas, bh
+        jmp exit_queEscribeEstadisticas
+    
+    ganoURSS:
+        mov bh, URSS
+        add texto_estadisticas, bh
+        jmp exit_queEscribeEstadisticas
+    
+    ganoEmpate:
+        mov bh, draw
+        add texto_estadisticas, bh
+        jmp exit_queEscribeEstadisticas
+        
+exit_queEscribeEstadisticas:            
+ret
+endp
+
+
+proc guardarRanking
+    call queEscribeEstadisticas
+    mov ah, 3CH
+    mov cx, 00H
+    mov dx, offset path_estadisticas
+    int 21h
+    mov puntero_estadisticas, ax
+    mov ah, 40h
+    mov bx, puntero_estadisticas
+    mov dx, offset texto_estadisticas
+    mov cx, 1000
+    int 21h
+    mov ah, 3eh
+    mov bx, puntero_estadisticas
+    int 21h
+ret
+endp    
+
 
 mapaArriba db "00..........................WAR GAMES -1983...............................",10,13,"01.......-.....:**:::*=-..-++++:............:--::=WWW***+-++-.............",10,13,"02...:=WWWWWWW=WWW=:::+:..::...--....:=+W==WWWWWWWWWWWWWWWWWWWWWWWW+-.....",10,13,"03..-....:WWWWWWWW=-=WW*.........--..+::+=WWWWWWWWWWWWWWWWWWWW:..:=.......",10,13,"04.......+WWWWWW*+WWW=-:-.........-+*=:::::=W*W=WWWW*++++++:+++=-.........",10,13,"05......*WWWWWWWWW=..............::..-:--+++::-++:::++++++++:--..-........",10,13,"06.......:**WW=*=...............-++++:::::-:+::++++++:++++++++............",10,13,"07.......:*=+:=*=..............-+++++:::::-:+::++++++:+++++++++...........",10,13,"08........-+:...-..............:+++++::+:++-++::-.-++++::+:::-............",10,13,"09..........--:-...............::++:+++++++:-+:.....::...-+:...-..........",10,13,"$"
 
@@ -844,7 +896,25 @@ ganoUSAw db "SOVIET UNION fue destruido gana UNITED STATES!!$"
 
 ganoURSSb db "Base Secreta de UNITED STATES fue destruida gana SOVIET UNION!!$"
 
-ganoUSAb db "Base Secreta de SOVIET UNION fue destruida gana UNITED STATES!!$" 
+ganoUSAb db "Base Secreta de SOVIET UNION fue destruida gana UNITED STATES!!$"
+
+USA db "USA$"
+
+URSS db "URSS$"
+
+draw db "Empate$"
+
+quienGano db ?
+
+cantDisparosUSA db 0
+
+cantDisparosURSS db 0
+
+path_estadisticas dw "C:\estadisticas.txt"
+
+puntero_estadisticas dw ?
+
+texto_estadisticas db ?
 
 empate db "Empate!! La base secreta de ambos paises fue destruida$"
 
@@ -899,4 +969,3 @@ usa_w_L4 db 8,9,10,11,12,13,16,17,18,0
 usa_w_L5 db 7,8,9,10,11,12,13,14,15,0
 
 usa_w_l6 db 10,11,0
-
